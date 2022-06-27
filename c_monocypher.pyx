@@ -302,12 +302,40 @@ cdef extern from "monocypher.h":
     # Only use to generate ephemeral keys you want to hide.
     void crypto_x25519_dirty_small(uint8_t pk[32], const uint8_t sk[32])
     void crypto_x25519_dirty_fast (uint8_t pk[32], const uint8_t sk[32])
-    
+
     # scalar division
     # ---------------
     void crypto_x25519_inverse(uint8_t       blind_salt [32],
                                const uint8_t private_key[32],
                                const uint8_t curve_point[32])
+
+
+cdef class Poly1305:
+    cdef crypto_poly1305_ctx _ctx
+
+    """Incrementally compute the Poly1305 hash.
+
+    :param key: The 32-byte key.
+    """
+    def __init__(self, key):
+        crypto_poly1305_init(&self._ctx, key)
+
+    def update(self, message):
+        """Add new data to the hash.
+
+        :param message: Additional data to hash.
+        """
+        crypto_poly1305_update(&self._ctx, message, len(message))
+
+    def finalize(self):
+        """Finalize and return the computed hash.
+
+        :return: The hash.
+        """
+        mac = bytes(16)
+        crypto_poly1305_final(&self._ctx, mac)
+        return mac
+
 
 def wipe(data):
     """Wipe a bytes object from memory.
