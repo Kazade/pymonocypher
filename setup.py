@@ -11,17 +11,13 @@ import setuptools
 import os
 
 MYPATH = os.path.abspath(os.path.dirname(__file__))
-VERSION = '3.1.0.0'  # also change c_monocypher.pyx
+VERSION = '3.1.1.0'  # also change c_monocypher.pyx
 
 
-try:
-    from Cython.Build import cythonize
-    USE_CYTHON = os.path.isfile(os.path.join(MYPATH, 'c_monocypher.pyx'))
-except ImportError:
-    USE_CYTHON = False
+from Cython.Build import cythonize
 
 
-ext = '.pyx' if USE_CYTHON else '.c'
+ext = '.pyx'
 extensions = [
     setuptools.Extension('monocypher',
         sources=['c_monocypher' + ext, 'monocypher.c'],
@@ -30,11 +26,11 @@ extensions = [
     ),
 ]
 
-if USE_CYTHON:
-    from Cython.Build import cythonize
-    extensions = cythonize(
-        extensions, 
-        compiler_directives={'language_level': '3'})
+
+from Cython.Build import cythonize
+extensions = cythonize(
+    extensions,
+    compiler_directives={'language_level': '3'})
 
 
 # Get the long description from the README file
@@ -74,7 +70,9 @@ setuptools.setup(
     ],
 
     keywords='cryto cryptography monocypher chacha blake2b 25519',
-    install_requires = [],
+    install_requires = [
+        'Cython'
+    ],
     extras_require={
         'dev': ['check-manifest', 'Cython', 'coverage'],
     },
